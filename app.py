@@ -20,8 +20,6 @@ print("ushakiz 111111")
 load_dotenv()
 genai.configure( api_key = os.environ["GOOGLE_API_KEY"] )
 model = genai.GenerativeModel('gemini-pro')
-
-
 async def get_response(prompt, model="gemini-pro"):
     print("messages", prompt);
     res = await model.generate_content(messages, stream=False,
@@ -51,15 +49,16 @@ chat_message = st.chat_input("Click the button or type enter here. Calculate my 
 recommendation_str = "call 911"
 prompt = f"Given the following picture:\n" \
         f" Please assess the risks. "
+risk_type="fire"
 risk_score = risk_calc(risk_type)
-risk_score_message = "Oof! Your risk is a bit high\n"
+risk_score_message = "Your risk score is "+str(risk_score)+"."
 if (risk_score > 50):
-    risk_score = "Please investigate at this location."
+    risk_score = "Please check the risk report attached."
 if st.button("GET MY RISKSCORE")  or st.chat_message:
     st.chat_message("user").markdown(chat_message)
     res_area = st.chat_message("assistant").empty()
     messages.append(
-        {"role": "user", "parts":  ["Show me my risj score"]},
+        {"role": "user", "parts":  ["Show me my risk score"]},
     )
     res = model.generate_content(prompt, stream=True,
                                 safety_settings={'HARASSMENT':'block_none'})
@@ -67,9 +66,10 @@ if st.button("GET MY RISKSCORE")  or st.chat_message:
     print("res rsolved ",res)
 
     # res = get_response(prompt)
-    res_text='Your risk is '+str(risk_score)+". "+risk_message+". "
+    res_text='Your risk is '+str(risk_score)+". "+risk_score_message+". "
     for chunk in res:
-        res_text += chunk.parts[0].text
+        if chunk:
+          res_text += chunk.parts[0].text
     # res_text += res
     res_area.markdown(res_text)
     messages.append({"role": "model", "parts": [res_text]})
