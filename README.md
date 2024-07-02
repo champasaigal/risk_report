@@ -1,14 +1,19 @@
 # Google AI Chat - Streamlit App
 
-<!-- touch .env
+<!-- DELETE LATER
+touch .env
 echo add GOOGLE_API_KEY to .env
 python3 -m venv gemini-streamlit
 source gemini-streamlit/bin/activate
 pip uninstall streamlit 
 pip install streamlit
 python3 -m  pip install -r requirements.txt
-streamlit run app.py \\n  --browser.serverAddress=localhost \\n  --server.enableCORS=false \\n  --server.enableXsrfProtection=false \\n  --server.port 8080 -->
+streamlit run app.py \\n  --browser.serverAddress=localhost \\n  --server.enableCORS=false \\n  --server.enableXsrfProtection=false \\n  --server.port 8080 
+-->
 
+<!-- DELETE LATER
+ https://github.com/MuhammadMoinFaisal/LargeLanguageModelsProjects/blob/main/Run%20Gemini%20Pro%20Google%20Colab/Gemini_API.ipynb 
+ -->
 
 ## Overview
 
