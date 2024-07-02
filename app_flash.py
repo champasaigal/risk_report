@@ -2,6 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from google.cloud import aiplatform
 import pathlib
 import textwrap
 
@@ -18,7 +19,7 @@ def load_api_key():
 
 def main():
   """Main function for the Streamlit app."""
-  st.title("Image Text Generation App")
+  st.title("FireGuard - Introducing FireGuard: Your Ultimate Fire Risk Detection Solution \n In an age where fire safety is paramount, FireGuard leverages advanced image processing technology to scan and detect fire risks from both house cameras and outdoor drones. Whether you’re monitoring your home or surveying vast outdoor spaces, FireGuard provides real-time alerts and insights, ensuring you can take preventative action before disaster strikes. With FireGuard, safeguarding your property from potential fire hazards has never been easier or more efficient.")
 
   # Load API key
   try:
@@ -44,7 +45,7 @@ def main():
     
     prompt = """
             Provide a description of the image.
-            The description should also contain whether there is fire in the image, if yes is it safe or unsafe fire.
+            The description should also contain whether there is fire in the image. Is there a risk of fire?
             """
 
     
