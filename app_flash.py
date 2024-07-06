@@ -9,6 +9,8 @@ import textwrap
 from vertexai.generative_models import GenerativeModel, Image
 
 import PIL.Image
+import re
+import requests
 
 
 def load_api_key():
@@ -57,6 +59,23 @@ def main():
       response = model.generate_content(contents)
       st.write("Generated Text:")
       st.write(response.text)  # Directly display the text using Streamlit
+
+      pattern = "There is a \w+ risk"
+
+      match = re.search(pattern, response.text)
+      print("fire risk search"+match)
+
+      if (match):
+          print("fire risk hellloooooo")
+          url = "https://us-central1-inchefs-login-v1.cloudfunctions.net/sendEmailNotification"
+          response = requests.get(url)
+          # Check if the request was successful (status code 200)
+          if response.status_code == 200:
+              print(response.text)  # Print the content of the response
+          else:
+              print("Request failed with status code:", response.status_code)
+            #call cloud function
+            
     except Exception as e:
       st.error(f"Error: During generation. {e}")
 
