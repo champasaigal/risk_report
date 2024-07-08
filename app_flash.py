@@ -11,6 +11,11 @@ from vertexai.generative_models import GenerativeModel, Image
 import PIL.Image
 import re
 import requests
+import json
+import requests
+import google.oauth2.id_token
+import google.auth.transport.requests
+
 
 
 def load_api_key():
@@ -57,23 +62,45 @@ def main():
     try:
       model = genai.GenerativeModel(model_name)
       response = model.generate_content(contents)
-      st.write("Generated Text:")
-      st.write(response.text)  # Directly display the text using Streamlit
-
-      pattern = "There is a \w+ risk"
-
-      match = re.search(pattern, response.text)
-      print("fire risk search"+match)
+      # st.write("Generated Text:"+str(response))
+      st.write("response text "+response.parts[0].text)  # Directly display the text using Streamlit
+      pattern = "There is a [a-zA-Z]* risk"
+      match = re.search(pattern, str(response))
+      print("match"+str(match))
 
       if (match):
           print("fire risk hellloooooo")
-          url = "https://us-central1-inchefs-login-v1.cloudfunctions.net/sendEmailNotification"
-          response = requests.get(url)
+          os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './my_service_account.json'
+          request = google.auth.transport.requests.Request()
+
+          metadata_server_url = 'http://metadata.google.internal/'
+          endpoint = '/computeMetadata/v1/project/inchefs-login-v1'
+          headers = {'Metadata-Flavor': 'Google'}
+          response = requests.get(
+              url=f'{metadata_server_url}/{endpoint}', headers=headers)
+
+          print("before req"+str(response))
+          audience = 'https://us-central1-inchefs-login-v1.cloudfunctions.net/sendEmailNotification'
+          TOKEN = google.oauth2.id_token.fetch_id_token(request, audience)
+
+
+          r = requests.post(
+              audience, 
+              headers={'Authorization': f"Bearer {TOKEN}", "Content-Type": "application/json"},
+              data=json.dumps({"key": "value"})  # possible request parameters
+          )
+          print("posted request")
+
+          r.status_code, r.reason
+  
+
           # Check if the request was successful (status code 200)
-          if response.status_code == 200:
-              print(response.text)  # Print the content of the response
+          if r.status_code == 200:
+              st.write(r.text)  # Print the content of the response
           else:
-              print("Request failed with status code:", response.status_code)
+              st.write("Request failed with status code:", r.status_code, r.reason)
+              st.write("Request failed with reason:",  r.reason)
+
             #call cloud function
             
     except Exception as e:
