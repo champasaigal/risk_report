@@ -52,7 +52,7 @@ def main():
     
     prompt = """
             Provide a description of the image.
-            The description should also contain whether there is fire in the image. Is there a risk of fire?
+            The description should also contain whether there is fire in the image. If there is a risk of fire, please say, yes, there is a risk of fire, otherwise say it is safe, dont worry
             """
 
     
@@ -62,46 +62,45 @@ def main():
     try:
       model = genai.GenerativeModel(model_name)
       response = model.generate_content(contents)
-      # st.write("Generated Text:"+str(response))
-      st.write("response text "+response.parts[0].text)  # Directly display the text using Streamlit
-      pattern = "There is a [a-zA-Z]* risk"
-      match = re.search(pattern, str(response))
-      print("match"+str(match))
-
-      if (match):
+      print("Generated Text:"+str(response))
+      st.write(response.parts[0].text)  # Directly display the text using Streamlit
+      pattern = " is a [a-zA-Z]* risk"
+      match1 = re.search(pattern, response.parts[0].text)
+      print("match"+str(match1))
+      pattern = " is a risk"
+      match2 = re.search(pattern, response.parts[0].text)
+      print("match"+str(match2))
+      if (match1 or match2):
           print("fire risk hellloooooo")
           os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './my_service_account.json'
           request = google.auth.transport.requests.Request()
 
-          metadata_server_url = 'http://metadata.google.internal/'
-          endpoint = '/computeMetadata/v1/project/inchefs-login-v1'
-          headers = {'Metadata-Flavor': 'Google'}
-          response = requests.get(
-              url=f'{metadata_server_url}/{endpoint}', headers=headers)
+          # metadata_server_url = 'http://metadata.google.internal/'
+          # endpoint = '/computeMetadata/v1/project/inchefs-login-v1'
+          # headers = {'Metadata-Flavor': 'Google'}
+          # response = requests.get(
+          #     url=f'{metadata_server_url}/{endpoint}', headers=headers)
 
-          print("before req"+str(response))
-          audience = 'https://us-central1-inchefs-login-v1.cloudfunctions.net/sendEmailNotification'
-          TOKEN = google.oauth2.id_token.fetch_id_token(request, audience)
-
-
+          # print("before req"+str(response))
+          audience = 'https://us-central1-inchefs-login-v1.cloudfunctions.net/sendEmailNotification2'
+          # TOKEN = google.oauth2.id_token.fetch_id_token(request, audience)
+          # print("TOKEN"+TOKEN)
           r = requests.post(
               audience, 
-              headers={'Authorization': f"Bearer {TOKEN}", "Content-Type": "application/json"},
-              data=json.dumps({"key": "value"})  # possible request parameters
+              headers={},
+              # headers={'Authorization': f"Bearer {TOKEN}", "Content-Type": "application/json"},
+              # data=json.dumps({"name": "Usha"})  # possible request parameters
           )
           print("posted request")
-
-          r.status_code, r.reason
-  
-
+          # r.status_code, r.reason
           # Check if the request was successful (status code 200)
           if r.status_code == 200:
               st.write(r.text)  # Print the content of the response
           else:
-              st.write("Request failed with status code:", r.status_code, r.reason)
-              st.write("Request failed with reason:",  r.reason)
+              print("Request failed with status code:", r.status_code, r.reason)
+              print("Request failed with reason:",  r.reason)
 
-            #call cloud function
+          #call cloud function
             
     except Exception as e:
       st.error(f"Error: During generation. {e}")
