@@ -1,0 +1,51 @@
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+from google.cloud import storage
+import os
+
+class UploadHandler(FileSystemEventHandler):
+    def __init__(self, bucket_name, folder_to_watch):
+        self.bucket_name = bucket_name
+        self.folder_to_watch = folder_to_watch
+        self.client = storage.Client()
+        self.bucket = self.client.get_bucket(bucket_name)
+    
+    def on_created(self, event):
+        if not event.is_directory:
+            self.upload_to_bucket(event.src_path)
+
+    def on_modified(self, event):
+        if not event.is_directory:
+            self.upload_to_bucket(event.src_path)
+
+    def upload_to_bucket(self, file_path):
+        try:
+            # Get the relative file path
+            relative_path = os.path.relpath(file_path, self.folder_to_watch)
+            # Create a blob object from the relative path
+            blob = self.bucket.blob(relative_path)
+            # Upload the file
+            blob.upload_from_filename(file_path)
+            print(f"Uploaded {file_path} to {self.bucket_name}")
+        except Exception as e:
+            print(f"Failed to upload {file_path}: {e}")
+
+def monitor_folder(bucket_name, folder_to_watch):
+    event_handler = UploadHandler(bucket_name, folder_to_watch)
+    observer = Observer()
+    observer.schedule(event_handler, path=folder_to_watch, recursive=True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
+
+if __name__ == "__main__":
+    # Replace these with your bucket name and folder to watch
+    BUCKET_NAME = 'your-bucket-name'
+    FOLDER_TO_WATCH = '/path/to/your/folder'
+
+    monitor_folder(BUCKET_NAME, FOLDER_TO_WATCH)
